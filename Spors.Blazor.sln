@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30608.117
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spors.Blazor.Components", "Spors.Blazor.Components\Spors.Blazor.Components.csproj", "{6BE665DF-8F58-491E-8504-688BDE38156E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Spors.Blazor", "Spors.Blazor\Spors.Blazor.csproj", "{6BE665DF-8F58-491E-8504-688BDE38156E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
