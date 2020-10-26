@@ -1,0 +1,80 @@
+﻿@using System.Text
+@using Spors.Blazor.Charts
+
+@if(IsSupported)
+{
+    <div style='
+    height: @AddSuffix(Height, "px"); 
+    width: @AddSuffix(Width, "px"); 
+    background-image: @CalculateConicGradient();
+    border-radius: 50%;
+    '></div>
+}
+else 
+{
+    if(_customFallbackContent)
+    {
+        @NotSupportedContent
+    }
+    else
+    {
+        <p>Your browser version is not supported.</p>
+    }
+}
+
+@code {
+    [Parameter]
+    public int Height { get; set; }
+
+    [Parameter]
+    public int Width { get; set; }
+
+    [Parameter]
+    public List<DonutChartItem> Items { get; set; }
+
+    [Parameter]
+    public RenderFragment NotSupportedContent { get; set; }
+
+    [Parameter]
+    public bool IsSupported { get; set; }
+
+    private bool _customFallbackContent;
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        bool supportCheckRequired = true;
+
+        foreach(var param in parameters)
+        {
+            if (param.Name == nameof(NotSupportedContent))
+                _customFallbackContent = true;
+            else if (param.Name == nameof(IsSupported))
+                supportCheckRequired = false;
+        }
+
+@*        if (supportCheckRequired)
+            IsSupported =  *@ // TODO: invoke js here
+
+        await base.SetParametersAsync(parameters);
+    }
+
+    private string CalculateConicGradient() 
+    {
+        string inner = string.Empty;         
+
+        for(int index = 0; index < Items.Count; index++)
+        {
+            DonutChartItem item = Items[index];
+
+            if (index != 0)
+                inner += ", ";
+
+            inner += $"rgb({item.Fill.R}, {item.Fill.G}, {item.Fill.B}) {item.Percentage}%";
+        }
+
+        return $"conic-gradient({inner})";
+    }
+
+    private string AddSuffix(object element, string suffix)
+        => element.ToString() + suffix;
+}
