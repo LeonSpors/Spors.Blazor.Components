@@ -1,7 +1,7 @@
 ﻿@using Spors.Blazor.Charts
 
-@inject IJSRuntime JSRuntime
-@implements IAsyncDisposable
+@inject NavigationManager NavigationManager
+@inject Interop Interop
 
 @if(IsSupported)
 {
@@ -47,8 +47,6 @@ else
 
     private bool _customFallbackContent;
 
-    private Task<IJSObjectReference> _module;
-
     protected override void OnInitialized() 
     {
         Height = 50;
@@ -56,9 +54,6 @@ else
         RadialWidth = 25;
         Items = new();
     }
-
-    private Task<IJSObjectReference> Module 
-        => _module ??= JSRuntime.InvokeAsync<IJSObjectReference>("import", "_content/Spors.Blazor/js/spors-blazor.js").AsTask();
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
@@ -72,20 +67,10 @@ else
                 supportCheckRequired = false;
         }
 
-        var module = await Module;
         if (supportCheckRequired)
-            IsSupported = await module.InvokeAsync<bool>("supportsProperty", "background: conic-gradient(#f06, gold);");
+            IsSupported = await Interop.IsSupported("background: conic-gradient(#f06, gold);");
 
         await base.SetParametersAsync(parameters);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (_module != null)
-        {
-            var module = await _module;
-            await module.DisposeAsync();
-        }
     }
 
     private string CalculateConicGradient() 
