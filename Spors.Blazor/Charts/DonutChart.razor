@@ -1,22 +1,20 @@
-﻿@using Spors.Blazor.Charts
-
-@inject NavigationManager NavigationManager
+﻿@inject NavigationManager NavigationManager
 @inject Interop Interop
 
-@if(IsSupported)
+@if (_isSupported)
 {
     <div style='
-        min-height: @AddSuffix(Height, "px"); 
-        max-height: @AddSuffix(Height, "px"); 
-        min-width: @AddSuffix(Width, "px"); 
-        max-width: @AddSuffix(Width, "px"); 
-        background-image: radial-gradient(@CalculateRadialGradient()), conic-gradient(@CalculateConicGradient());
+        min-height: @AddSuffix(Height, "px");
+        max-height: @AddSuffix(Height, "px");
+        min-width: @AddSuffix(Width, "px");
+        max-width: @AddSuffix(Width, "px");
+        background-image: @GetRadialGradient(), @GetConicGradient();
         border-radius: 50%;
     '></div>
 }
-else 
+else
 {
-    if(_customFallbackContent)
+    if (_customContent)
     {
         @NotSupportedContent
     }
@@ -42,56 +40,39 @@ else
     [Parameter]
     public RenderFragment NotSupportedContent { get; set; }
 
-    [Parameter]
-    public bool IsSupported { get; set; }
+    public bool _isSupported;
 
-    private bool _customFallbackContent;
+    private bool _customContent;
 
-    protected override void OnInitialized() 
+    protected override async Task OnParametersSetAsync()
     {
-        Height = 50;
-        Width = 50;
-        RadialWidth = 25;
-        Items = new();
-    }
-
-    public override async Task SetParametersAsync(ParameterView parameters)
-    {
-        bool supportCheckRequired = true;
-
-        foreach(var param in parameters)
+        if (NotSupportedContent != null)
         {
-            if (param.Name == nameof(NotSupportedContent))
-                _customFallbackContent = true;
-            else if (param.Name == nameof(IsSupported))
-                supportCheckRequired = false;
+            _customContent = true;
         }
-
-        if (supportCheckRequired)
-            IsSupported = await Interop.IsSupported("background: conic-gradient(#f06, gold);");
-
-        await base.SetParametersAsync(parameters);
+        _isSupported = await Interop.IsSupported("background: conic-gradient(#f06, gold)");
     }
 
-    private string CalculateConicGradient() 
+    private string GetConicGradient()
     {
-        string inner = string.Empty;         
+        string inner = string.Empty;
 
-        for(int index = 0; index < Items.Count; index++)
-        {
-            DonutChartItem item = Items[index];
+        if(Items != null)
+            for (int index = 0; index < Items.Count; index++)
+            {
+                DonutChartItem item = Items[index];
 
-            if (index != 0)
-                inner += ", ";
+                if (index != 0)
+                    inner += ", ";
 
-            inner += $"rgb({item.Fill.R}, {item.Fill.G}, {item.Fill.B}) {item.Percentage}%";
-        }
+                inner += $"rgb({item.Fill.R}, {item.Fill.G}, {item.Fill.B}) {item.Percentage}%";
+            }
 
-        return inner;
+        return $"conic-gradient({inner})";
     }
 
-    private string CalculateRadialGradient() 
-        => $"white {RadialWidth * 2}, transparent {(RadialWidth * 2) + 1}%";
+    private string GetRadialGradient()
+        => $"radial-gradient(white {RadialWidth * 2}%, transparent {(RadialWidth * 2) + 1}%)";
 
     private string AddSuffix(object element, string suffix)
         => element.ToString() + suffix;
