@@ -1,7 +1,5 @@
 ﻿@typeparam TRowData
 
-@using Spors.Blazor.Grids
-
 <CascadingValue IsFixed="true" Value="this">@ChildContent</CascadingValue>
 
 <table @attributes="@TableAttributes">
@@ -20,7 +18,7 @@
                 var index = 0;
                 foreach (var item in Items)
                 {
-                    <tr @key="item.GetHashCode()" class="@(RowClass?.Invoke(item, index++))">
+                    <tr @key="item.GetHashCode()" class="@(RowClass?.Invoke(item, index++))" @onclick="() => OnClick(item)">
                         @foreach (var column in columns)
                         {
                             @column.CellTemplate(item)
@@ -45,6 +43,9 @@
     [Parameter]
     public Func<TRowData, int, string> RowClass { get; set; }
 
+    [Parameter]
+    public Action<TRowData> OnClickChildren { get; set; }
+
     private readonly List<GridColumn<TRowData>> columns = new List<GridColumn<TRowData>>();
 
     internal void AddColumn(GridColumn<TRowData> column)
@@ -56,5 +57,11 @@
     {
         if (firstRender)
             StateHasChanged();
+    }
+
+    private void OnClick(TRowData data)
+    {
+        if (OnClickChildren != null)
+            OnClickChildren(data);
     }
 }
